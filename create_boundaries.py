@@ -184,18 +184,18 @@ class PerimeterAnnotator:
     
     def _refresh_lines(self):
         segs = list(self._segments)
-        cols = list(self._seg_colors)
+        cols = list(self._seg_colours)
         # Preview closing edge
         if not self.is_closed and len(self.verts) >= 2:
             segs.append((tuple(self.verts[-1]), tuple(self.verts[0])))
             cols.append(COLOURS[self.current_type])
         self.lc.set_segments(segs)
-        self.lc.set_colors(cols if cols else [(0, 0, 0, 0)])
+        self.lc.set_colours(cols if cols else [(0, 0, 0, 0)])
         self.fig.canvas.draw_idle()
 
     # -------- Events -------- #
 
-    def on_click(self, event):
+    def _on_click(self, event):
         if event.inaxes != self.ax:
             return
         if event.button == 1:
@@ -209,11 +209,13 @@ class PerimeterAnnotator:
             names = {'1': 'ventricular', '2': 'pial', '3': 'left', '4': 'right'}
             self.current_type = names[key]
         elif key in ('backspace', 'delete'):
-            self.undo()
+            self._undo()
         elif key == 'f':
-            self.finish()
+            self._finish()
+        elif key == 'r':
+            self._reset()
         elif key == 's':
-            self.save()
+            self._save()
         elif key in ('q', 'escape'):
             plt.close(self.fig)
             return
@@ -227,7 +229,7 @@ class PerimeterAnnotator:
             print("Polygon is closed. Press 'r' to reset.")
             return
         if self.verts:
-            self._segments.append()
+            self._segments.append((tuple(self.verts[-1]), (x, y)))
             self._seg_colours.append(COLOURS[self.current_type])
             self.edge_type_names.append(self.current_type)
         self.verts.append([x, y])
@@ -258,7 +260,7 @@ class PerimeterAnnotator:
         self._refresh_lines()
         print("Polygon is closed. Set desired type and press 's' to save.")
 
-    def _rest(self):
+    def _reset(self):
         self.verts.clear()
         self.edge_type_names.clear()
         self._segments.clear()
@@ -309,7 +311,7 @@ class PerimeterAnnotator:
             areas = [np.sum(labels == k) for k in range(1, labels.max() + 1)]
             mask = labels == (1 + int(np.argmax(areas)))
         
-        mask_u8 = (mask.astype(np.unit8)) * 255
+        mask_u8 = (mask.astype(np.uint8)) * 255
         mask_path = f"{self.outstem}_cortex_mask.tif"
         io.imsave(mask_path, mask_u8)
         print(f"    Saved {mask_path}")
@@ -324,7 +326,7 @@ class PerimeterAnnotator:
         # Report counts
         for code, name in NAME_FOR_CODE.items():
             count = np.sum(boundary_labels == code)
-            print(f"    {name:12s} (code {code}): {code:6d} pixels")
+            print(f"    {name:12s} (code {code}): {count:6d} pixels")
         # unlabelled_edge = np.sum(mask & ~np.pad(mask, 1, constant_values=False)[1:-1, 1:-1]) - np.sum(boundary_labels > 0)
         print(f"    Saved {lab_path}")
         print(f"Done. Press 'q' to quit or 'r' to redo.")
@@ -353,3 +355,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
