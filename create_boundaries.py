@@ -190,7 +190,7 @@ class PerimeterAnnotator:
             segs.append((tuple(self.verts[-1]), tuple(self.verts[0])))
             cols.append(COLOURS[self.current_type])
         self.lc.set_segments(segs)
-        self.lc.set_colours(cols if cols else [(0, 0, 0, 0)])
+        self.lc.set_colors(cols if cols else [(0, 0, 0, 0)])
         self.fig.canvas.draw_idle()
 
     # -------- Events -------- #
@@ -201,7 +201,7 @@ class PerimeterAnnotator:
         if event.button == 1:
             self._add_point(float(event.xdata), float(event.ydata))
         elif event.button == 3:
-            self.undo()
+            self._undo()
     
     def _on_key(self, event):
         key = event.key
@@ -264,6 +264,7 @@ class PerimeterAnnotator:
         self.verts.clear()
         self.edge_type_names.clear()
         self._segments.clear()
+        self._seg_colours.clear()
         self.is_closed = False
         self._update_title()
         self._refresh_lines()
@@ -288,7 +289,7 @@ class PerimeterAnnotator:
         perim = {
             'vertices': self.verts,
             'edge_types': edge_codes,
-            'edge_types_names': self.edge_type_names,
+            'edge_type_names': self.edge_type_names,
             'codes_legend': CODES,
             'note': 'edge i goes from verts[i] to verts[(i+1) % n]',
         }
@@ -344,6 +345,7 @@ def main():
     args = ap.parse_args()
 
     img = io.imread(args.image)
+    img = np.squeeze(img)
     if img.ndim == 3 and img.shape[2] > 3:
         lo, hi = float(img.min()), float(img.max())
         img = ((img.astype(np.float32) - lo) / max(1e-6, hi - lo))
@@ -354,6 +356,3 @@ def main():
     plt.show()
 
 if __name__ == '__main__':
-    main()
-
-
