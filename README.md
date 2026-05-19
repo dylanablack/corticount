@@ -21,9 +21,22 @@ python create_boundaries.py \
 
 # Running the solver.
 python solve_phi_psi.py \
+--mask \
+--boundary_labels \
+--outdir path/to/output \
+--prefix output_prefix
 
 # Generate radial streamlines, which define the lateral boundaries of regions and cortical thickness measurements.
 python generate_streamlines.py \
+--phi \ # the phi TIFF
+--mask \ # the cortex mask TIFF
+--boundary_labels \
+--perimeter_json # perimeter JSON from earlier annotation \
+--outdir \
+--prefix \
+--seed_spacing_um \
+--um_per_px \
+--background # image for background to streamlines
 
 # Export regions as segmentations and/or ImageJ ROIs for downstream analysis.
 python export_corticounts.py \
