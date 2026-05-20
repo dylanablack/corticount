@@ -47,6 +47,8 @@ from __future__ import annotations
 import argparse, json, os, sys, warnings
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg") # Jon found this was needed for the GUI
 from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
 from skimage import io, draw, measure, transform
